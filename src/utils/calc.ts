@@ -1,18 +1,22 @@
-// Spoke-length formula (direct port from the design spreadsheet):
-//   L = sqrt( (fd/2 * sin(2π * X / (N/2)))²
-//           + (ERD/2 - (fd/2 * cos(2π * X / (N/2))))²
-//           + ftc² ) - shd/2
-// fd = flange diameter, X = crossings, N = spoke count, ftc = flange-to-center
+// Spoke-length formula from spokeCalc.xlsx, simplified via the law of cosines:
+//   L = sqrt( (fd/2)² + (ERDe/2)² − 2·(fd/2)·(ERDe/2)·cos(θ) + ftce² ) − shd/2
+// where θ = 4π·X/N. This is mathematically identical to the original
+//   sqrt((fd/2·sinθ)² + (ERDe/2 − fd/2·cosθ)² + ftce²) − shd/2
+// but drops the sin() call and lets cos(θ) be reused across both sides.
+//
+// fd  = flange diameter           ERDe = effective ERD (rim.erd + nipple.erdAdj)
+// X   = crossings                 N    = hole count
+// ftc = flange-to-center          ftce = effective ftc (with asym applied)
+// shd = spoke-hole diameter on the flange
 
 export type WheelSide = "front" | "rear";
+export type Rounding = "raw" | "even" | "odd";
 
-/** Fields from rim catalog used by spoke math */
 export interface RimForCalc {
   erd: number;
   asym?: number;
 }
 
-/** Fields from hub catalog used by spoke math */
 export interface HubForCalc {
   fdL: number;
   ftcL: number;
@@ -21,60 +25,83 @@ export interface HubForCalc {
   shd?: number;
 }
 
+export interface NippleForCalc {
+  erdAdj: number;
+}
+
 export interface CalcSpokesInput {
   rim: RimForCalc | null | undefined;
   hub: HubForCalc | null | undefined;
+  nipple?: NippleForCalc | null;
   holes: number | null | undefined;
   crossings: number | null | undefined;
   wheelSide: WheelSide;
 }
 
-function computeSide(
+function sideLength(
   fd: number,
   ftc: number,
-  erd: number,
-  X: number,
-  N: number,
+  erdeHalf: number,
+  erdeHalfSq: number,
+  cosAngle: number,
   shd: number
 ): number {
-  const halfN = N / 2;
-  const angle = (2 * Math.PI * X) / halfN;
-  const a = (fd / 2) * Math.sin(angle);
-  const b = erd / 2 - (fd / 2) * Math.cos(angle);
-  return Math.sqrt(a * a + b * b + ftc * ftc) - shd / 2;
+  const fdHalf = fd / 2;
+  const d2 = fdHalf * fdHalf + erdeHalfSq - 2 * fdHalf * erdeHalf * cosAngle;
+  return Math.sqrt(d2 + ftc * ftc) - shd / 2;
 }
 
-// Asymmetric rim offset moves the spoke bed toward the non-drive/non-disc side,
-// lengthening the drive/disc-side effective FTC and shortening the other.
+// Asymmetric rim offset shifts the spoke bed toward the non-drive/non-disc side,
+// lengthening the drive/disc-side effective ftc and shortening the other.
 export function calcSpokes({
   rim,
   hub,
+  nipple,
   holes,
   crossings,
   wheelSide,
 }: CalcSpokesInput): { left: number; right: number } | null {
   if (!rim || !hub || !holes || crossings == null) return null;
-  const erd = rim.erd;
-  const asym = rim.asym || 0;
-  const shd = hub.shd || 2.6;
 
-  let ftcL, ftcR;
-  if (wheelSide === "front") {
-    ftcL = hub.ftcL + asym;
-    ftcR = hub.ftcR - asym;
-  } else {
-    ftcL = hub.ftcL - asym;
-    ftcR = hub.ftcR + asym;
-  }
+  const erde = rim.erd + (nipple?.erdAdj ?? 0);
+  const erdeHalf = erde / 2;
+  const erdeHalfSq = erdeHalf * erdeHalf;
+  const angle = (4 * Math.PI * crossings) / holes;
+  const cosAngle = Math.cos(angle);
+  const shd = hub.shd ?? 2.6;
 
-  const left = computeSide(hub.fdL, ftcL, erd, crossings, holes, shd);
-  const right = computeSide(hub.fdR, ftcR, erd, crossings, holes, shd);
-  return { left, right };
+  const asym = rim.asym ?? 0;
+  const sign = wheelSide === "front" ? 1 : -1;
+  const ftcL = hub.ftcL + sign * asym;
+  const ftcR = hub.ftcR - sign * asym;
+
+  return {
+    left: sideLength(hub.fdL, ftcL, erdeHalf, erdeHalfSq, cosAngle, shd),
+    right: sideLength(hub.fdR, ftcR, erdeHalf, erdeHalfSq, cosAngle, shd),
+  };
 }
 
-// Round to nearest even mm using spreadsheet convention: (raw - 0.6) → ceil to even
-export function roundSpoke(raw: number | null | undefined): number | null {
+// Excel ODD()/EVEN(): round away from zero to the next odd/even integer.
+function excelEven(x: number): number {
+  const s = x < 0 ? -1 : 1;
+  return s * 2 * Math.ceil(Math.abs(x) / 2);
+}
+
+function excelOdd(x: number): number {
+  const s = x < 0 ? -1 : 1;
+  return s * (2 * Math.ceil((Math.abs(x) - 1) / 2) + 1);
+}
+
+// The spreadsheet shifts the raw length by 0.6 mm before rounding so that values
+// like 266.40 round down while 266.41 rounds up (note in Front Calculator!D19).
+const ROUND_OFFSET = 0.6;
+
+export function roundSpoke(
+  raw: number | null | undefined,
+  mode: Rounding = "even"
+): number | null {
   if (raw == null || !Number.isFinite(raw)) return null;
-  const adjusted = raw - 0.6;
-  return Math.ceil(adjusted / 2) * 2;
+  if (mode === "raw") return raw;
+  const adjusted = raw - ROUND_OFFSET;
+  return mode === "even" ? excelEven(adjusted) : excelOdd(adjusted);
 }
