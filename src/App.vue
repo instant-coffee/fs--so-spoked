@@ -179,7 +179,7 @@
         @clear="recents = []"
       />
 
-      !-- Footer -->
+      <!-- Footer -->
       <div :style="footerStyle">
         <span>SPOKE CALC · v1.0</span>
         <span>{{ recents.length }} SAVED</span>
