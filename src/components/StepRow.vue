@@ -80,7 +80,7 @@
     gap: "14px",
     alignItems: "center",
     color: props.theme.text,
-    fontFamily: "Space Grotesk",
+    fontFamily: props.theme.bodyFont,
   }));
 
   const numStyle = computed(() => ({
@@ -100,7 +100,7 @@
   }));
 
   const valueStyle = computed(() => ({
-    fontFamily: "Space Grotesk",
+    fontFamily: props.theme.bodyFont,
     fontWeight: 500,
     fontSize: "18px",
     color: props.theme.text,

@@ -153,7 +153,7 @@
   }));
 
   const bigNumStyle = computed(() => ({
-    fontFamily: "Playfair Display",
+    fontFamily: props.theme.displayFont,
     fontWeight: 700,
     fontSize: "56px",
     lineHeight: 0.95,

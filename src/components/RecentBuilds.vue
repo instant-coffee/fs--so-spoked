@@ -114,7 +114,7 @@
     backgroundColor: props.theme.surface,
     padding: "12px 14px",
     color: props.theme.text,
-    fontFamily: "Space Grotesk",
+    fontFamily: props.theme.bodyFont,
     display: "grid",
     gridTemplateColumns: "1fr auto auto",
     gap: "14px",

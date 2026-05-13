@@ -54,7 +54,7 @@
       border: `1px solid ${active ? props.theme.text : props.theme.border}`,
       backgroundColor: active ? props.theme.text : props.theme.surface,
       color: active ? props.theme.surface : props.theme.text,
-      fontFamily: "Playfair Display",
+      fontFamily: props.theme.displayFont,
       fontSize: "28px",
       fontWeight: 700,
       transition: "all 140ms ease",

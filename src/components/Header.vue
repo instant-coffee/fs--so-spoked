@@ -88,24 +88,24 @@
     borderBottom: `4px solid ${props.theme.accentLine}`,
   }));
 
-  const h1Style = {
-    fontFamily: "Playfair Display",
+  const h1Style = computed(() => ({
+    fontFamily: props.theme.displayFont,
     fontWeight: 700,
     fontSize: "44px",
     lineHeight: 0.95,
     margin: 0,
     color: "#FFFFFF",
     letterSpacing: "-0.02em",
-  };
+  }));
 
-  const subtitleStyle = {
-    fontFamily: "Space Grotesk",
+  const subtitleStyle = computed(() => ({
+    fontFamily: props.theme.bodyFont,
     fontSize: "13px",
     color: "#A0A098",
     margin: "14px 0 22px 0",
     maxWidth: "320px",
     lineHeight: 1.45,
-  };
+  }));
 
   function wheelBtnStyle(side, i) {
     const active = props.wheelSide === side;

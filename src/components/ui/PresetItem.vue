@@ -34,7 +34,7 @@ const btnStyle = computed(() => ({
   gridTemplateColumns: '1fr auto',
   alignItems: 'center',
   gap: '12px',
-  fontFamily: 'Space Grotesk',
+  fontFamily: props.theme.bodyFont,
   transition: 'all 140ms ease',
 }))
 

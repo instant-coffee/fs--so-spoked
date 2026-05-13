@@ -17,7 +17,7 @@
       minHeight: '100vh',
       backgroundColor: theme.bg,
       color: theme.text,
-      fontFamily: 'Space Grotesk',
+      fontFamily: theme.bodyFont,
       display: 'flex',
       justifyContent: 'center',
     }"
@@ -189,6 +189,9 @@
 
   <!-- Tweaks panel (visible unless in monolith) -->
   <TweaksPanel v-if="!tweaks.monolith" :tweaks="tweaks" @set-tweak="setTweak" />
+
+  <!-- Brand panel — always visible; controls white-label identity -->
+  <BrandPanel :brand="brand" @set-brand="setBrand" />
 </template>
 
 <script setup>
@@ -199,6 +202,8 @@
   import { LACING_OPTIONS } from "./data/options.js";
   import { calcSpokes } from "./utils/calc.js";
   import { makeTheme } from "./utils/theme.js";
+  import { DEFAULT_BRAND } from "./utils/brand.js";
+  import { loadGoogleFont } from "./utils/fonts.js";
 
   import Header from "./components/Header.vue";
   import ResultCard from "./components/ResultCard.vue";
@@ -211,6 +216,7 @@
   import RecentBuilds from "./components/RecentBuilds.vue";
   import MonolithView from "./components/MonolithView.vue";
   import TweaksPanel from "./components/TweaksPanel.vue";
+  import BrandPanel from "./components/BrandPanel.vue";
 
   // ── Tweaks ───────────────────────────────────────────────────────────────────
   const tweaks = ref(
@@ -250,9 +256,40 @@
     { deep: true }
   );
 
+  // ── Brand ────────────────────────────────────────────────────────────────────
+  const brand = ref(
+    (() => {
+      try {
+        return (
+          JSON.parse(localStorage.getItem("spokecalc:brand") || "null") ||
+          { ...DEFAULT_BRAND }
+        );
+      } catch {
+        return { ...DEFAULT_BRAND };
+      }
+    })()
+  );
+
+  function setBrand(key, value) {
+    brand.value = { ...brand.value, [key]: value };
+  }
+
+  watch(
+    brand,
+    (val) => {
+      try {
+        localStorage.setItem("spokecalc:brand", JSON.stringify(val));
+      } catch {}
+      // Load any non-default Google Fonts when typography changes
+      loadGoogleFont(val.displayFont);
+      loadGoogleFont(val.bodyFont);
+    },
+    { deep: true, immediate: true }
+  );
+
   // ── Theme ────────────────────────────────────────────────────────────────────
   const theme = computed(() =>
-    makeTheme(tweaks.value.theme, tweaks.value.accent)
+    makeTheme(tweaks.value.theme, tweaks.value.accent, brand.value)
   );
 
   // ── Build state ───────────────────────────────────────────────────────────────
