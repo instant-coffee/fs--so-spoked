@@ -134,6 +134,24 @@
             :value="build.crossings"
             :theme="theme"
             @change="updateBuild({ crossings: $event })"
+            @done="isWizard ? (openStep = 5) : (openStep = null)"
+          />
+        </StepRow>
+
+        <!-- Step 5: Nipples -->
+        <StepRow
+          v-if="!isWizard || openStep === 5"
+          num="05"
+          label="Nips"
+          :value="nipple.label"
+          :open="openStep === 5"
+          :theme="theme"
+          @toggle="toggleStep(5)"
+        >
+          <NipplePicker
+            :value="build.nippleId"
+            :theme="theme"
+            @change="updateBuild({ nipplId: $event })"
             @done="openStep = null"
           />
         </StepRow>
@@ -200,6 +218,7 @@
   import { RIMS } from "./data/rims.js";
   import { REAR_HUBS, FRONT_HUBS } from "./data/hubs.js";
   import { LACING_OPTIONS } from "./data/options.js";
+  import { NIPPLES } from "./data/nipples.js";
   import { calcSpokes } from "./utils/calc.js";
   import { makeTheme } from "./utils/theme.js";
   import { DEFAULT_BRAND } from "./utils/brand.js";
@@ -212,6 +231,7 @@
   import HubPicker from "./components/HubPicker.vue";
   import HolePicker from "./components/HolePicker.vue";
   import LacingPicker from "./components/LacingPicker.vue";
+  import NipplePicker from "./components/NipplePicker.vue";
   import DiagramSection from "./components/DiagramSection.vue";
   import RecentBuilds from "./components/RecentBuilds.vue";
   import MonolithView from "./components/MonolithView.vue";
@@ -261,8 +281,9 @@
     (() => {
       try {
         return (
-          JSON.parse(localStorage.getItem("spokecalc:brand") || "null") ||
-          { ...DEFAULT_BRAND }
+          JSON.parse(localStorage.getItem("spokecalc:brand") || "null") || {
+            ...DEFAULT_BRAND,
+          }
         );
       } catch {
         return { ...DEFAULT_BRAND };
@@ -301,6 +322,7 @@
     hubCustom: null,
     holes: 32,
     crossings: 3,
+    nippleId: "dsh-16",
   };
 
   const build = ref(
@@ -385,6 +407,7 @@
       holes: build.value.holes,
       crossings: build.value.crossings,
       wheelSide: build.value.wheelSide,
+      nipple: build.value.nippleId,
     });
   });
 
@@ -418,6 +441,10 @@
     () =>
       LACING_OPTIONS.find((o) => o.key === build.value.crossings) ||
       LACING_OPTIONS[3]
+  );
+
+  const nipple = computed(
+    () => NIPPLES.find((o) => o.key === build.value.nippleId) || NIPPLES[0]
   );
 
   // ── Handlers ──────────────────────────────────────────────────────────────────
