@@ -2,61 +2,60 @@
   <div
     :style="{
       display: 'grid',
-      gridTemplateColumns: 'repeat(4, 1fr)',
-      gap: '8px',
+      gridTemplateColumns: 'repeat(5, 1fr)',
+      gap: '6px',
     }"
   >
     <button
-      v-for="h in HOLE_OPTIONS"
-      :key="h"
-      @click="select(h)"
-      :style="btnStyle(h)"
+      v-for="opt in NIPPLES"
+      :key="opt.key"
+      @click="select(opt.key)"
+      :style="btnStyle(opt.key)"
     >
-      {{ h }}
+      {{ opt.short }}
       <span
         :style="{
           display: 'block',
-          fontFamily: 'Space Mono',
-          fontSize: '9px',
-          fontWeight: 700,
-          letterSpacing: '0.16em',
+          fontSize: '8px',
+          fontWeight: 400,
+          letterSpacing: '0.1em',
           marginTop: '4px',
           opacity: 0.7,
         }"
       >
-        HOLES
+        {{ opt.label.split("-")[0].toUpperCase() }}
       </span>
     </button>
   </div>
 </template>
 
 <script setup>
-  import { computed } from "vue";
-  import { HOLE_OPTIONS } from "../data/options.js";
+  import { NIPPLES } from "../data/nipples.js";
 
   const props = defineProps({
-    value: Number,
+    value: String,
     theme: Object,
   });
 
   const emit = defineEmits(["change", "done"]);
 
-  function select(h) {
-    emit("change", h);
+  function select(key) {
+    emit("change", key);
     emit("done");
   }
 
-  function btnStyle(h) {
-    const active = props.value === h;
+  function btnStyle(key) {
+    const active = props.value === key;
     return {
-      padding: "24px 0",
+      padding: "20px 0",
       cursor: "pointer",
       border: `1px solid ${active ? props.theme.text : props.theme.border}`,
       backgroundColor: active ? props.theme.text : props.theme.surface,
       color: active ? props.theme.surface : props.theme.text,
-      fontFamily: props.theme.displayFont,
-      fontSize: "28px",
+      fontFamily: "Space Mono",
       fontWeight: 700,
+      fontSize: "12px",
+      letterSpacing: "0.08em",
       transition: "all 140ms ease",
     };
   }

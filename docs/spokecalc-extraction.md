@@ -1,6 +1,6 @@
 # spokeCalc.xlsx — Calculation Extraction
 
-Source file: `/Users/lachnobl/Documents/ReDesign/spokeCalc.xlsx` (14 sheets).
+Source file: `spokeCalc.xlsx` (14 sheets).
 This document is the canonical reference for every formula in the workbook, restated for a TypeScript implementation.
 
 ---

@@ -4,7 +4,7 @@
       minHeight: '100vh',
       backgroundColor: '#000000',
       color: '#FFFFFF',
-      fontFamily: 'Space Grotesk',
+      fontFamily: theme.bodyFont,
       display: 'flex',
       flexDirection: 'column',
     }"
@@ -128,13 +128,13 @@
     marginBottom: "8px",
   };
 
-  const bigNumStyle = {
-    fontFamily: "Playfair Display",
+  const bigNumStyle = computed(() => ({
+    fontFamily: props.theme.displayFont,
     fontWeight: 700,
     fontSize: "min(28vw, 180px)",
     lineHeight: 0.85,
     letterSpacing: "-0.04em",
-  };
+  }));
 
   const rawStyle = {
     fontFamily: "Space Mono",
