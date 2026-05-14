@@ -7,19 +7,28 @@
     />
 
     <!-- Preset list -->
-    <div
-      v-if="mode === 'preset'"
-      :style="{ maxHeight: '360px', overflowY: 'auto', paddingRight: '2px' }"
-    >
-      <PresetItem
-        v-for="h in hubList"
-        :key="h.id"
-        :active="!hub?._custom && hub?.id === h.id"
+    <div v-if="mode === 'preset'">
+      <FilterChips
+        :groups="filterGroups"
+        :values="filters"
         :theme="theme"
-        :primary="`${h.brand} — ${h.model}`"
-        :secondary="`L: ⌀${h.fdL} · ${h.ftcL}mm  │  R: ⌀${h.fdR} · ${h.ftcR}mm`"
-        @select="onSelectPreset(h)"
+        @change="onFilterChange"
       />
+      <div :style="{ maxHeight: '300px', overflowY: 'auto', paddingRight: '2px' }">
+        <PresetItem
+          v-for="h in filteredHubs"
+          :key="h.id"
+          :active="!hub?._custom && hub?.id === h.id"
+          :theme="theme"
+          :primary="`${h.brand} — ${h.model}`"
+          :secondary="`L: ⌀${h.fdL} · ${h.ftcL}mm  │  R: ⌀${h.fdR} · ${h.ftcR}mm`"
+          @select="onSelectPreset(h)"
+        />
+        <div
+          v-if="filteredHubs.length === 0"
+          :style="emptyStyle"
+        >No hubs match these filters</div>
+      </div>
     </div>
 
     <!-- Custom inputs -->
@@ -85,6 +94,7 @@
   import PresetCustomTabs from "./ui/PresetCustomTabs.vue";
   import PresetItem from "./ui/PresetItem.vue";
   import NumInput from "./ui/NumInput.vue";
+  import FilterChips from "./ui/FilterChips.vue";
 
   const props = defineProps({
     theme: Object,
@@ -100,6 +110,32 @@
     "change-mode",
     "done",
   ]);
+
+  const filters = reactive({ brand: null, discipline: null });
+
+  const brands = computed(() =>
+    [...new Set(props.hubList.map((h) => h.brand))].sort()
+  );
+  const disciplines = computed(() =>
+    [...new Set(props.hubList.map((h) => h.discipline))].sort()
+  );
+
+  const filterGroups = computed(() => [
+    { key: "brand", label: "Brand", options: brands.value },
+    { key: "discipline", label: "Discipline", options: disciplines.value },
+  ]);
+
+  const filteredHubs = computed(() =>
+    props.hubList.filter((h) => {
+      if (filters.brand && h.brand !== filters.brand) return false;
+      if (filters.discipline && h.discipline !== filters.discipline) return false;
+      return true;
+    })
+  );
+
+  function onFilterChange({ key, value }) {
+    filters[key] = filters[key] === value ? null : value;
+  }
 
   const custom = reactive({
     fdL: props.build.hubCustom?.fdL ?? 54.5,
@@ -118,6 +154,15 @@
     emit("set-hub-custom", { ...custom });
     emit("done");
   }
+
+  const emptyStyle = computed(() => ({
+    fontFamily: "Space Mono",
+    fontSize: "10px",
+    color: props.theme.muted,
+    padding: "20px 0",
+    textAlign: "center",
+    letterSpacing: "0.08em",
+  }));
 
   const sideHintStyle = computed(() => ({
     fontFamily: "Space Mono",

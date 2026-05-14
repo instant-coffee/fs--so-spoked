@@ -6,18 +6,29 @@
     <div v-if="open" ref="panelRef" class="brd-panel" :style="panelPos">
       <div class="brd-hd" @mousedown="startDrag">
         <b>Brand</b>
-        <button class="brd-x" aria-label="Close" @mousedown.stop @click="open = false">✕</button>
+        <button
+          class="brd-x"
+          aria-label="Close"
+          @mousedown.stop
+          @click="open = false"
+        >
+          ✕
+        </button>
       </div>
 
       <div class="brd-body">
-
         <!-- ── Identity ──────────────────────────────────────────────────── -->
         <div class="brd-sect">Identity</div>
         <div class="brd-row">
           <div class="brd-lbl"><span>Mode</span></div>
           <div class="brd-seg">
-            <div class="brd-seg-thumb" :style="segThumb(brand.enabled ? 1 : 0, 2)" />
-            <button type="button" @click="set('enabled', false)">Default</button>
+            <div
+              class="brd-seg-thumb"
+              :style="segThumb(brand.enabled ? 1 : 0, 2)"
+            />
+            <button type="button" @click="set('enabled', false)">
+              Default
+            </button>
             <button type="button" @click="set('enabled', true)">Brand</button>
           </div>
         </div>
@@ -29,10 +40,20 @@
           <div class="brd-lbl"><span>Primary</span></div>
           <div class="brd-color-row">
             <label class="brd-swatch" :style="{ background: brand.primary }">
-              <input type="color" :value="brand.primary" @input="set('primary', $event.target.value)" />
+              <input
+                type="color"
+                :value="brand.primary"
+                @input="set('primary', $event.target.value)"
+              />
             </label>
-            <input type="text" class="brd-hex" :value="brand.primary"
-              @change="onHex('primary', $event.target.value)" maxlength="7" placeholder="#000000" />
+            <input
+              type="text"
+              class="brd-hex"
+              :value="brand.primary"
+              @change="onHex('primary', $event.target.value)"
+              maxlength="7"
+              placeholder="#000000"
+            />
           </div>
         </div>
 
@@ -40,10 +61,20 @@
           <div class="brd-lbl"><span>Secondary</span></div>
           <div class="brd-color-row">
             <label class="brd-swatch" :style="{ background: brand.secondary }">
-              <input type="color" :value="brand.secondary" @input="set('secondary', $event.target.value)" />
+              <input
+                type="color"
+                :value="brand.secondary"
+                @input="set('secondary', $event.target.value)"
+              />
             </label>
-            <input type="text" class="brd-hex" :value="brand.secondary"
-              @change="onHex('secondary', $event.target.value)" maxlength="7" placeholder="#000000" />
+            <input
+              type="text"
+              class="brd-hex"
+              :value="brand.secondary"
+              @change="onHex('secondary', $event.target.value)"
+              maxlength="7"
+              placeholder="#000000"
+            />
           </div>
         </div>
 
@@ -51,10 +82,20 @@
           <div class="brd-lbl"><span>Accent</span></div>
           <div class="brd-color-row">
             <label class="brd-swatch" :style="{ background: brand.accent }">
-              <input type="color" :value="brand.accent" @input="set('accent', $event.target.value)" />
+              <input
+                type="color"
+                :value="brand.accent"
+                @input="set('accent', $event.target.value)"
+              />
             </label>
-            <input type="text" class="brd-hex" :value="brand.accent"
-              @change="onHex('accent', $event.target.value)" maxlength="7" placeholder="#000000" />
+            <input
+              type="text"
+              class="brd-hex"
+              :value="brand.accent"
+              @change="onHex('accent', $event.target.value)"
+              maxlength="7"
+              placeholder="#000000"
+            />
           </div>
         </div>
 
@@ -63,52 +104,65 @@
 
         <div class="brd-row">
           <div class="brd-lbl"><span>Display</span></div>
-          <select class="brd-select" :value="brand.displayFont"
-            @change="set('displayFont', $event.target.value)">
+          <select
+            class="brd-select"
+            :value="brand.displayFont"
+            @change="set('displayFont', $event.target.value)"
+          >
             <optgroup label="Serif">
-              <option v-for="f in DISPLAY_FONTS.serif" :key="f" :value="f">{{ f }}</option>
+              <option v-for="f in DISPLAY_FONTS.serif" :key="f" :value="f">
+                {{ f }}
+              </option>
             </optgroup>
             <optgroup label="Sans-serif">
-              <option v-for="f in DISPLAY_FONTS.sansSerif" :key="f" :value="f">{{ f }}</option>
+              <option v-for="f in DISPLAY_FONTS.sansSerif" :key="f" :value="f">
+                {{ f }}
+              </option>
             </optgroup>
           </select>
         </div>
 
         <div class="brd-row">
           <div class="brd-lbl"><span>Body</span></div>
-          <select class="brd-select" :value="brand.bodyFont"
-            @change="set('bodyFont', $event.target.value)">
+          <select
+            class="brd-select"
+            :value="brand.bodyFont"
+            @change="set('bodyFont', $event.target.value)"
+          >
             <optgroup label="Serif">
-              <option v-for="f in BODY_FONTS.serif" :key="f" :value="f">{{ f }}</option>
+              <option v-for="f in BODY_FONTS.serif" :key="f" :value="f">
+                {{ f }}
+              </option>
             </optgroup>
             <optgroup label="Sans-serif">
-              <option v-for="f in BODY_FONTS.sansSerif" :key="f" :value="f">{{ f }}</option>
+              <option v-for="f in BODY_FONTS.sansSerif" :key="f" :value="f">
+                {{ f }}
+              </option>
             </optgroup>
           </select>
         </div>
 
         <!-- TODO(v2): free-text Google Font name input with debounced live preview -->
         <!-- TODO(v3): custom font file upload (WOFF2 / TTF) -->
-
       </div>
     </div>
   </Teleport>
 </template>
 
 <script setup>
-  import { ref, computed } from "vue"
-  import { DISPLAY_FONTS, BODY_FONTS } from "../utils/brand.js"
+  import { ref, computed } from "vue";
+  import { DISPLAY_FONTS, BODY_FONTS } from "../utils/brand.js";
 
   const props = defineProps({
     brand: Object,
-  })
+  });
 
-  const emit = defineEmits(["set-brand"])
+  const emit = defineEmits(["set-brand"]);
 
-  const open = ref(false)
-  const panelRef = ref(null)
+  const open = ref(false);
+  const panelRef = ref(null);
   // Panel anchored bottom-left, opposite TWEAKS (bottom-right)
-  const offset = ref({ x: 16, y: 72 })
+  const offset = ref({ x: 16, y: 72 });
 
   const triggerStyle = computed(() => ({
     position: "fixed",
@@ -126,58 +180,59 @@
     fontWeight: 700,
     letterSpacing: "0.16em",
     textTransform: "uppercase",
-  }))
+  }));
 
   const panelPos = computed(() => ({
     left: `${offset.value.x}px`,
     bottom: `${offset.value.y}px`,
-  }))
+  }));
 
   function segThumb(idx, n) {
     return {
       left: `calc(2px + ${idx} * (100% - 4px) / ${n})`,
       width: `calc((100% - 4px) / ${n})`,
-    }
+    };
   }
 
   function set(key, value) {
-    emit("set-brand", key, value)
+    emit("set-brand", key, value);
   }
 
   function onHex(key, val) {
     if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
-      set(key, val.toUpperCase())
+      set(key, val.toUpperCase());
     }
   }
 
-  const PAD = 16
+  const PAD = 16;
 
   function startDrag(e) {
-    const panel = panelRef.value
-    if (!panel) return
-    const rect = panel.getBoundingClientRect()
-    const sx = e.clientX, sy = e.clientY
-    const startLeft   = rect.left
-    const startBottom = window.innerHeight - rect.bottom
+    const panel = panelRef.value;
+    if (!panel) return;
+    const rect = panel.getBoundingClientRect();
+    const sx = e.clientX,
+      sy = e.clientY;
+    const startLeft = rect.left;
+    const startBottom = window.innerHeight - rect.bottom;
 
     function move(ev) {
-      const p = panelRef.value
-      if (!p) return
-      const maxL = Math.max(PAD, window.innerWidth  - p.offsetWidth  - PAD)
-      const maxB = Math.max(PAD, window.innerHeight - p.offsetHeight - PAD)
+      const p = panelRef.value;
+      if (!p) return;
+      const maxL = Math.max(PAD, window.innerWidth - p.offsetWidth - PAD);
+      const maxB = Math.max(PAD, window.innerHeight - p.offsetHeight - PAD);
       offset.value = {
-        x: Math.min(maxL, Math.max(PAD, startLeft   + (ev.clientX - sx))),
+        x: Math.min(maxL, Math.max(PAD, startLeft + (ev.clientX - sx))),
         y: Math.min(maxB, Math.max(PAD, startBottom - (ev.clientY - sy))),
-      }
+      };
     }
 
     function up() {
-      window.removeEventListener("mousemove", move)
-      window.removeEventListener("mouseup",   up)
+      window.removeEventListener("mousemove", move);
+      window.removeEventListener("mouseup", up);
     }
 
-    window.addEventListener("mousemove", move)
-    window.addEventListener("mouseup",   up)
+    window.addEventListener("mousemove", move);
+    window.addEventListener("mouseup", up);
   }
 </script>
 

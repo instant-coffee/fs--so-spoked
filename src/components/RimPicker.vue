@@ -7,20 +7,29 @@
     />
 
     <!-- Preset list -->
-    <div
-      v-if="mode === 'preset'"
-      :style="{ maxHeight: '320px', overflowY: 'auto', paddingRight: '2px' }"
-    >
-      <PresetItem
-        v-for="r in RIMS"
-        :key="r.id"
-        :active="!rim?._custom && rim?.id === r.id"
+    <div v-if="mode === 'preset'">
+      <FilterChips
+        :groups="filterGroups"
+        :values="filters"
         :theme="theme"
-        :primary="`${r.brand} — ${r.model}`"
-        :secondary="`${r.size} · ERD ${r.erd}mm · Asym ${r.asym}mm · ${r.holes}H typical`"
-        :badge="r.size"
-        @select="onSelectPreset(r)"
+        @change="onFilterChange"
       />
+      <div :style="{ maxHeight: '260px', overflowY: 'auto', paddingRight: '2px' }">
+        <PresetItem
+          v-for="r in filteredRims"
+          :key="r.id"
+          :active="!rim?._custom && rim?.id === r.id"
+          :theme="theme"
+          :primary="`${r.brand} — ${r.model}`"
+          :secondary="`${r.size} · ERD ${r.erd}mm · Asym ${r.asym}mm · ${r.holes}H typical`"
+          :badge="r.size"
+          @select="onSelectPreset(r)"
+        />
+        <div
+          v-if="filteredRims.length === 0"
+          :style="emptyStyle"
+        >No rims match these filters</div>
+      </div>
     </div>
 
     <!-- Custom inputs -->
@@ -55,6 +64,7 @@
   import PresetCustomTabs from "./ui/PresetCustomTabs.vue";
   import PresetItem from "./ui/PresetItem.vue";
   import NumInput from "./ui/NumInput.vue";
+  import FilterChips from "./ui/FilterChips.vue";
 
   const props = defineProps({
     theme: Object,
@@ -70,6 +80,31 @@
     "done",
   ]);
 
+  const filters = reactive({ brand: null, discipline: null, size: null });
+
+  const brands = computed(() => [...new Set(RIMS.map((r) => r.brand))].sort());
+  const disciplines = computed(() => [...new Set(RIMS.map((r) => r.discipline))].sort());
+  const sizes = computed(() => [...new Set(RIMS.map((r) => r.size))].sort());
+
+  const filterGroups = computed(() => [
+    { key: "brand", label: "Brand", options: brands.value },
+    { key: "discipline", label: "Discipline", options: disciplines.value },
+    { key: "size", label: "Size", options: sizes.value },
+  ]);
+
+  const filteredRims = computed(() =>
+    RIMS.filter((r) => {
+      if (filters.brand && r.brand !== filters.brand) return false;
+      if (filters.discipline && r.discipline !== filters.discipline) return false;
+      if (filters.size && r.size !== filters.size) return false;
+      return true;
+    })
+  );
+
+  function onFilterChange({ key, value }) {
+    filters[key] = filters[key] === value ? null : value;
+  }
+
   const custom = reactive({
     erd: props.build.rimCustom?.erd ?? 597,
     asym: props.build.rimCustom?.asym ?? 2,
@@ -84,6 +119,15 @@
     emit("set-rim-custom", { erd: custom.erd, asym: custom.asym });
     emit("done");
   }
+
+  const emptyStyle = computed(() => ({
+    fontFamily: "Space Mono",
+    fontSize: "10px",
+    color: props.theme.muted,
+    padding: "20px 0",
+    textAlign: "center",
+    letterSpacing: "0.08em",
+  }));
 
   const applyBtnStyle = computed(() => ({
     padding: "12px 0",
