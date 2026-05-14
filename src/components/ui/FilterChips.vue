@@ -5,12 +5,15 @@
       <div :style="chipsStyle">
         <button
           @click="$emit('change', { key: group.key, value: null })"
+          :aria-pressed="values[group.key] === null"
+          :aria-label="`${group.label}: All`"
           :style="chipStyle(values[group.key] === null)"
         >All</button>
         <button
           v-for="opt in group.options"
           :key="opt"
           @click="$emit('change', { key: group.key, value: opt })"
+          :aria-pressed="values[group.key] === opt"
           :style="chipStyle(values[group.key] === opt)"
         >{{ opt }}</button>
       </div>
